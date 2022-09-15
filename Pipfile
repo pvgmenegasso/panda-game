@@ -6,6 +6,7 @@ name = "pypi"
 [packages]
 panda3d = "==1.10.11"
 mypy = "*"
+pmw = "*"
 
 [dev-packages]
 mypy = "*"
