@@ -1,4 +1,6 @@
-
+# Start logging capabilities
+from pycolorlogs import init_logs, DEBUG, INFO, debug, info
+init_logs(DEBUG)
 # Initialize Panda and create a window
 from direct.showbase.ShowBase import ShowBase
 from entities.player.player import Player
@@ -9,5 +11,5 @@ from direct.gui.DirectGui import *  # Imports Gui objects we use for putting
 
 
 x = World(base)
-p = Player(base)
+p = Player(base) 
 base.run()

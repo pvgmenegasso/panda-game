@@ -28,6 +28,8 @@ class Resource(DirectObject):
 
         super().__init__()
 
+    def __repr__(self) -> str:
+        return f'{self.name}: {self.value}'
 
     def process(self, task):
         if self.delta > 0:

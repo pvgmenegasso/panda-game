@@ -1,22 +1,24 @@
 from __future__ import annotations
+from configparser import ConfigParser
+from dataclasses import dataclass
+from glob import glob
 from types import MethodType
-from typing import Any, Callable, Dict, List, Tuple
+from typing import Any, Callable, Dict, List, Optional, Tuple
 from direct.showbase.DirectObject import DirectObject
 
 from entities.world.resource import Resource
-
-
 
 class Building(DirectObject):
 
     def __init__(
         self,
-        cost       : Tuple[int, int],
+        cost       : dict[int, int],
         name       : str,
         id         : int,
         model_file : str,
-        action     : Callable,
-        args       : List[Any]
+        icon       : str,
+        action     : Optional[Callable] = None,
+        args       : Optional[List[Any]] = None
         ) -> None:
 
         self.cost: Tuple[int, int]   = cost
@@ -33,12 +35,24 @@ class Building(DirectObject):
     @classmethod
     def load_resource_from_file(cls, filename : str) -> Building:
         config = ConfigParser()
-        config.read(f'entities/buildings/{filename}')
+        config.read(f'{filename}')
+        modelstr = config['building']['model_file']
         new_building = Building(
-            icon = config['resource']['icon'],
-            name = config['resource']['name'],
-            id   = int(config['resource']['id'])
+            icon = config['building']['icon'],
+            name = config['building']['name'],
+            id   = int(config['building']['id']),
+            cost = dict(config['cost']),
+            model_file = f'entities/buildings/{modelstr}' 
         )
-        for atr, value in config['resource'].items():
+        for atr, value in config['building'].items():
             new_building.__setattr__(atr, value)
         return new_building
+
+    @classmethod
+    def load_buildings(cls) -> List[Building]:
+        return_list = []
+        for file in glob('entities/buildings/*.cfg'):
+            return_list.append(cls.load_resource_from_file(file))
+        return return_list
+
+default_buildings = Building.load_buildings()

@@ -1,7 +1,11 @@
+from dataclasses import InitVar, dataclass, field
 from typing import Tuple
 from direct.showbase.DirectObject import DirectObject
 from direct.showbase.ShowBase import ShowBase
 from direct.task.Task import Task
+from direct.gui.DirectGui import *
+from panda3d.core import TextNode
+from entities.buildings.building import Building
 from entities.world.resource import Resource
 from graphics.model_loader import load_model
 
@@ -10,10 +14,16 @@ from graphics.model_loader import load_model
 def clamp(i, mn=-1, mx=1) -> int:
     return min(max(i, mn), mx)
 
-
+@dataclass
 class Player(DirectObject):
     
-    def __init__(self, base: ShowBase) -> None:
+    base : InitVar[ShowBase]
+    resources : list[Resource] = field(default_factory=list)
+    player_buildings : list[Building] = field(default_factory=list)
+    
+
+    def __post_init__(self, base: ShowBase) -> None:
+
         self.object = load_model(
             model_file = 'entities/buildings/house.obj',
             parent = render
@@ -21,8 +31,7 @@ class Player(DirectObject):
         
         self.base = base
         self.camera = camera
-        self.objects = []
-        self.resources = []
+        self.objects = Building.load_buildings()
 
         self.resources.append(
             Resource.load_resource_from_file('example.cfg')
@@ -37,6 +46,7 @@ class Player(DirectObject):
         # Now we add a task that will take care of turning the head
         taskMgr.add(self.move_obj, "move_obj")
         taskMgr.add(self.move_cam, "moveTask")
+        taskMgr.add(self.show_res)
 
         self.accept("w", self.delta_cam, [(0, 1)])
         self.accept("s", self.delta_cam, [(0, -1)])
@@ -50,15 +60,23 @@ class Player(DirectObject):
 
         super().__init__()
 
-    def place_obj(self):
+    def show_res(self, task) -> None:
+        for res in self.resources:
+            title = OnscreenText(
+                text=str(res),
+                parent=self.base.a2dTopLeft, align=TextNode.A_left,
+                style=1, fg=(1, 1, 1, 1), pos=(0, -0.2), scale=.07)
+
+    def place_obj(self, obj_id : int) -> None:
+        obj = (filter(lambda x: x.id==obj_id ,self.objects)).next()
         self.objects.append(
             load_model(
-            model_file = 'entities/buildings/house.obj',
+            model_file = obj.model_file,
             parent = render,
             position=(self.object.getX(), self.object.getY(), self.object.getZ())
             )
-
         )
+
     def move_cam(self, task):
         self.camera.setX(self.camera.getX()+2*self.cam_vec[0])
         self.camera.setY(self.camera.getY()+2*self.cam_vec[1])
