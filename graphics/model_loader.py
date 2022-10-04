@@ -1,12 +1,18 @@
 from typing import Tuple
-from panda3d.core import NodePath
+from pycolorlogs import debug
 
 def load_model(
     model_file : str, 
     parent, 
     scale : float | None = None, 
     position : Tuple[int, int, int] | None = None
-    ) -> NodePath:
+    ):
+
+    debug('Started loading model')
+    debug(f'     \n\
+        model_file : {model_file}, \n\
+        scale : {scale}, \n\
+        position : {position}')
 
     object = loader.loadModel(modelPath = model_file)
     object.reparentTo(parent)

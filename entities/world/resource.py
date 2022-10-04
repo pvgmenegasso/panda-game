@@ -1,5 +1,7 @@
 from __future__ import annotations
 from configparser import ConfigParser
+from pycolorlogs import debug
+from glob import glob
 from math import ceil
 from direct.showbase.DirectObject import DirectObject
 
@@ -50,12 +52,22 @@ class Resource(DirectObject):
     @classmethod
     def load_resource_from_file(cls, filename : str) -> Resource:
         config = ConfigParser()
-        config.read(f'entities/world/{filename}')
+        config.read(filename)
         new_resource = Resource(
-            icon = config['resource']['icon'],
-            name = config['resource']['name'],
-            id   = int(config['resource']['id'])
+            icon  = config['resource']['icon'],
+            name  = config['resource']['name'],
+            id    = int(config['resource']['id']),
+            value = int(config['resource']['value']),
+            cap   = int(config['resource']['cap'])
         )
-        for atr, value in config['resource'].items():
-            new_resource.__setattr__(atr, value)
         return new_resource
+
+    @classmethod
+    def load_resources(cls):
+        return_dict = dict()
+        for file in glob("entities/world/*.cfg"):
+            debug('Loading resource')
+            resource = cls.load_resource_from_file(file)
+            debug(resource)
+            return_dict[resource.id]= resource
+        return return_dict
