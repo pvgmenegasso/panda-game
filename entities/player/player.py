@@ -2,10 +2,10 @@ import copy
 from dataclasses import InitVar, dataclass, field
 from typing import Any, ClassVar, Optional, Tuple
 from direct.showbase.DirectObject import DirectObject
-from direct.showbase.ShowBase import ShowBase
+from direct.showbase.ShowBase import ShowBase, builtins
 from direct.task.Task import Task
 from direct.gui.DirectGui import *
-from panda3d.core import TextNode
+from panda3d.core import TextNode, NodePath
 from entities.buildings.building import Building
 from entities.world.resource import Resource
 from graphics.model_loader import load_model
@@ -25,12 +25,12 @@ class Player(DirectObject):
     default_buildings  : ClassVar[list[Building]] = Building.load_buildings()
     selected_building  : int = 0
     object             : Optional[Any] = field(default=None)
+    camera             : NodePath = camera
     
 
     def __post_init__(self, base: ShowBase) -> None:
         
         self.base = base
-        self.camera = camera
 
         print(self.resources.items())
 
